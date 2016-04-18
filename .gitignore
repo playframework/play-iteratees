@@ -1,1 +1,19 @@
+logs
 target
+.idea
+.idea_modules
+.classpath
+.project
+.settings
+RUNNING_PID
+generated.keystore
+generated.truststore
+*.log
+
+# Scala-IDE specific
+.scala_dependencies
+.project
+.settings
+.cache-main
+.cache-tests
+
