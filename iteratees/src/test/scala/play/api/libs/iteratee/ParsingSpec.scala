@@ -6,8 +6,8 @@ package play.api.libs.iteratee
 import Parsing._
 
 import org.specs2.mutable._
-import concurrent.duration.Duration
-import concurrent.Await
+import scala.concurrent.duration.Duration
+import scala.concurrent.Await
 
 object ParsingSpec extends Specification
     with IterateeSpecification with ExecutionSpecification {
