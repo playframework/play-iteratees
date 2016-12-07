@@ -1,6 +1,4 @@
 language: scala
-# Trusty VM has 1.8u101
-# https://github.com/travis-ci/travis-ci/issues/3259#issuecomment-243534696
 dist: trusty
 sudo: false
 group: beta
@@ -16,3 +14,6 @@ before_cache:
 - rm -rf $HOME/.ivy2/cache/com.typesafe.play/*
 - rm -rf $HOME/.ivy2/cache/scala_*/sbt_*/com.typesafe.play/*
 - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print0 | xargs -n10 -0 rm
+notifications:
+  slack:
+    secure: o9pCAb6jSqmVtn+YJs46AEB5zDl8Ez6nFYg+ylMJ6bg5xUfEo00Qfb/oVfzwO88UvszCfL54OEOXGE7fLSC8UkmCjhHu19oWEp8ph45bXm5bIUfcUmwJ9Bcl+OzOgdx4kT6dHa30jYEU/uohTQbobY0ciDEUp1UUyHRy+29CnTuo6kCYf4i0VIZaEPPiZmZN6Ubhww1+eWt+zFgS1/LVloyJXl4fxIho0YPxgOuSK8rAHv+P1Q5W+sPxc2jA8l+F82etcggajCJMnAlLITvlpGEsOW3oL6/Bq2AnaPnkVZGeKj3wMGBfRHVuM9OLNVlRvZygbTPcYCg0cojPDeEtEaLfD+M2rgXGwpLB25NDhx/Y8d4noVVyfnQ83GO6hVxH83hFvhdzU9mTJmBvkLOkTCxLbfMrp6CndL5evGCLJ3PEQEytXBtJsepB6zTHIclD/KI8QZjsTwvLkI+6CIeQs/oCyZUMugHMZmcP6CayqySPTQvvw8OF1s9EFLk1+009Qrk9Kb9DB5O1NnG6CCNG1QvuVD1kOen+MuCw4/t4OgEKlI7Lk2L/XZqIoqu+8uxWBTUGMU9IE81r28RpM0WyGn9BTzL4+CW7sYlZvQh1/WU7BHxpxceYswIGQ8bOqB0DUTYKoCpZL6kCK2jpwqeF+IXB5i8DcmqZ2DQKjJk2kmI=
