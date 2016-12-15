@@ -471,11 +471,16 @@ object IterateesSpec extends Specification
     }
 
     "return a failed Future if you try to recover from an Error iteratee with a failed Future" in {
-      mustExecute(2) { implicit foldEC =>
+      testExecution { implicit foldEC =>
         val exception = new RuntimeException(expected)
-        val it = error(unexpected).recoverM { case t: Throwable => Future.failed(exception) }
+        val it = error(unexpected).recoverM { case _: Throwable => Future.failed(exception) }
         val actual = await((Enumerator(unexpected) |>>> it).failed)
         actual must equalTo(exception)
+        // Iteratee.recoverM will call Future.map on a failed Promise.
+        // In Scala 2.11 the call to map results in a call to the ExecutionContext,
+        // in Scala 2.12 the ExecutionContext isn't called, since map is a nop
+        // on a failed Promise.
+        foldEC.executionCount must equalTo(1) or equalTo(2)
       }
     }
   }

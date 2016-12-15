@@ -14,7 +14,8 @@ lazy val `play-iteratees` = project
     crossScalaVersions := Seq("2.12.1", "2.11.8"),
     libraryDependencies ++= Seq(
       "org.scala-stm" %% "scala-stm" % "0.8"
-    ) ++ specsBuild.map(_ % Test)
+    ) ++ specsBuild.map(_ % Test),
+    fork in Test := true
   )
 
 lazy val `play-iteratees-reactive-streams` = project
@@ -22,11 +23,12 @@ lazy val `play-iteratees-reactive-streams` = project
   .enablePlugins(PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings(
-    crossScalaVersions := Seq("2.12.1", "2.11.8"),
     scalaVersion := "2.12.1",
+    crossScalaVersions := Seq("2.12.1", "2.11.8"),
     libraryDependencies ++= Seq(
       "org.reactivestreams" % "reactive-streams" % "1.0.0"
-    ) ++ specsBuild.map(_ % Test)
+    ) ++ specsBuild.map(_ % Test),
+    fork in Test := true
   ).dependsOn(`play-iteratees`)
 
 lazy val `play-iteratees-root` = (project in file("."))
