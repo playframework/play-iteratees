@@ -14,7 +14,7 @@ import scala.util.Try
 trait IterateeSpecification {
   self: org.specs2.mutable.SpecificationLike =>
 
-  val waitTime = Duration(5, SECONDS)
+  val waitTime = Duration(30, SECONDS)
   def await[A](f: Future[A]): A = Await.result(f, waitTime)
   def ready[A](f: Future[A]): Future[A] = Await.ready(f, waitTime)
 
