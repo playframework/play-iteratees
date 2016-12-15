@@ -229,7 +229,7 @@ object IterateesSpec extends Specification
         case (it, _) => it.flatMap(_ => unitDone)
       }
       // Wait a bit longer so our CI tests don't time out
-      def awaitLonger[A](f: Future[A]): A = Await.result(f, Duration(15, SECONDS))
+      def awaitLonger[A](f: Future[A]): A = Await.result(f, Duration(30, SECONDS))
       awaitLonger(awaitLonger(flatMapped.feed(Input.EOF)).unflatten) must equalTo(Step.Done((), Input.Empty))
     }
 
