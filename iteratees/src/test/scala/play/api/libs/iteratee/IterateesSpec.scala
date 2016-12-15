@@ -4,9 +4,7 @@
 package play.api.libs.iteratee
 
 import org.specs2.mutable._
-
-import scala.concurrent.duration.{ Duration, SECONDS }
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.{ Future, ExecutionContext }
 import scala.util.{ Failure, Try }
 
 object IterateesSpec extends Specification
@@ -228,9 +226,7 @@ object IterateesSpec extends Specification
       val flatMapped: Iteratee[Unit, Unit] = (0 until overflowDepth).foldLeft[Iteratee[Unit, Unit]](Cont(_ => unitDone)) {
         case (it, _) => it.flatMap(_ => unitDone)
       }
-      // Wait a bit longer so our CI tests don't time out
-      def awaitLonger[A](f: Future[A]): A = Await.result(f, Duration(30, SECONDS))
-      awaitLonger(awaitLonger(flatMapped.feed(Input.EOF)).unflatten) must equalTo(Step.Done((), Input.Empty))
+      await(await(flatMapped.feed(Input.EOF)).unflatten) must equalTo(Step.Done((), Input.Empty))
     }
 
   }
