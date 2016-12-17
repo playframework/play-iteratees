@@ -7,11 +7,8 @@ package play.api.libs {
    * The Iteratee monad provides strict, safe, and functional I/O.
    */
   package object iteratee {
-
     type K[E, A] = Input[E] => Iteratee[E, A]
-
   }
-
 }
 
 package play.api.libs.iteratee {
@@ -22,15 +19,17 @@ package play.api.libs.iteratee {
     import scala.util.control.NonFatal
 
     /**
-     * Executes code immediately on the current thread, returning a successful or failed Future depending on
-     * the result.
+     * Executes code immediately on the current thread,
+     * returning a successful or failed Future depending on the result.
      *
      * TODO: Rename to `tryFuture`.
      */
-    def eagerFuture[A](body: => A): Future[A] = try Future.successful(body) catch { case NonFatal(e) => Future.failed(e) }
+    def eagerFuture[A](body: => A): Future[A] =
+      try Future.successful(body) catch { case NonFatal(e) => Future.failed(e) }
 
     /**
-     * Executes code in the given ExecutionContext, flattening the resulting Future.
+     * Executes code in the given ExecutionContext,
+     * flattening the resulting Future.
      */
     def executeFuture[A](body: => Future[A])(implicit ec: ExecutionContext): Future[A] = {
       Future {

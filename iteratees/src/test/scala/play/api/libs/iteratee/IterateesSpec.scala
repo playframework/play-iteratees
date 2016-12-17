@@ -456,7 +456,9 @@ object IterateesSpec extends Specification
 
     "recover with the expected fallback Future from an Error iteratee" in {
       mustExecute(2) { implicit foldEC =>
-        val it = error(unexpected).recoverM { case t: Throwable => Future.successful(expected) }(foldEC)
+        val it = error(unexpected).recoverM {
+          case t: Throwable => Future.successful(expected)
+        }(foldEC)
         val actual = await(Enumerator(unexpected) |>>> it)
         actual must equalTo(expected)
       }
@@ -471,22 +473,33 @@ object IterateesSpec extends Specification
     }
 
     "return a failed Future if you try to recover from an Error iteratee with a failed Future" in {
-      testExecution { implicit foldEC =>
+      val exCount = {
+        if (util.Properties.versionNumberString startsWith "2.12") 1
+        else 2
+
+        /*
+         With Scala <= 2.11, `Future(..)` call `prepare()` on the given 
+         `ExecutionContext` (see https://github.com/scala/scala/blob/2.11.x/src/library/scala/concurrent/Future.scala#L494 and https://github.com/scala/scala/blob/2.11.x/src/library/scala/concurrent/impl/Future.scala#L31 ),
+         whereas since Scala 2.12 there is no longer such call (see https://github.com/scala/scala/blob/2.12.x/src/library/scala/concurrent/Future.scala#L652 ).
+
+         Consequently there, one `Future` created with `StepIteratee.pureFold` 
+         is no longer executed with the prepared `TestExecutionContext`, 
+         and so the associated count is not incremented.
+         */
+      }
+
+      mustExecute(exCount) { implicit foldEC =>
         val exception = new RuntimeException(expected)
-        val it = error(unexpected).recoverM { case _: Throwable => Future.failed(exception) }
+        val it = error(unexpected).recoverM {
+          case t: Throwable => Future.failed(exception)
+        }
         val actual = await((Enumerator(unexpected) |>>> it).failed)
         actual must equalTo(exception)
-        // Iteratee.recoverM will call Future.map on a failed Promise.
-        // In Scala 2.11 the call to map results in a call to the ExecutionContext,
-        // in Scala 2.12 the ExecutionContext isn't called, since map is a nop
-        // on a failed Promise.
-        foldEC.executionCount must equalTo(1) or equalTo(2)
       }
     }
   }
 
   "Iteratee.recoverWith" should {
-
     val expected = "expected"
     val unexpected = "should not be returned"
 

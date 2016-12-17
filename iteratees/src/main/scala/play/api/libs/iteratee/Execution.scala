@@ -61,22 +61,23 @@ object Execution {
 
     def execute(runnable: Runnable): Unit = {
       local.get match {
-        case null =>
+        case null => try {
           // Trampoline is inactive in this thread so start it up!
-          try {
-            // The queue of Runnables to run after this one
-            // is initially empty.
-            local.set(Empty)
-            runnable.run()
-            executeScheduled()
-          } finally {
-            // We've run all the Runnables, so show that the 
-            // trampoline has been shut down.
-            local.set(null)
-          }
+          // The queue of Runnables to run after this one
+          // is initially empty.
+          local.set(Empty)
+          runnable.run()
+          executeScheduled()
+        } finally {
+          // We've run all the Runnables, so show that the
+          // trampoline has been shut down.
+          local.set(null)
+        }
+
         case Empty =>
           // Add this Runnable to our empty queue
           local.set(runnable)
+
         case next: Runnable =>
           // Convert the single queued Runnable into an ArrayDeque
           // so we can schedule 2+ Runnables
@@ -84,12 +85,14 @@ object Execution {
           runnables.addLast(next)
           runnables.addLast(runnable)
           local.set(runnables)
+
         case arrayDeque: ArrayDeque[_] =>
           // Add this Runnable to the end of the existing ArrayDeque
           val runnables = arrayDeque.asInstanceOf[ArrayDeque[Runnable]]
           runnables.addLast(runnable)
-        case illegal =>
-          throw new IllegalStateException(s"Unsupported trampoline ThreadLocal value: $illegal")
+
+        case illegal => throw new IllegalStateException(
+          s"Unsupported trampoline ThreadLocal value: $illegal")
       }
     }
 
@@ -97,34 +100,32 @@ object Execution {
      * Run all tasks that have been scheduled in the ThreadLocal.
      */
     @tailrec
-    private def executeScheduled(): Unit = {
-      local.get match {
-        case Empty =>
-          // Nothing to run
-          ()
-        case next: Runnable =>
-          // Mark the queue of Runnables after this one as empty
-          local.set(Empty)
-          // Run the only scheduled Runnable
-          next.run()
-          // Recurse in case more Runnables were added
-          executeScheduled()
-        case arrayDeque: ArrayDeque[_] =>
-          val runnables = arrayDeque.asInstanceOf[ArrayDeque[Runnable]]
-          // Rather than recursing, we can use a more efficient
-          // while loop. The value of the ThreadLocal will stay as
-          // an ArrayDeque until all the scheduled Runnables have been
-          // run.
-          while (!runnables.isEmpty) {
-            val runnable = runnables.removeFirst()
-            runnable.run()
-          }
-        case illegal =>
-          throw new IllegalStateException(s"Unsupported trampoline ThreadLocal value: $illegal")
-      }
+    private def executeScheduled(): Unit = local.get match {
+      case Empty => ( /* Nothing to run */ )
+
+      case next: Runnable =>
+        // Mark the queue of Runnables after this one as empty
+        local.set(Empty)
+        // Run the only scheduled Runnable
+        next.run()
+        // Recurse in case more Runnables were added
+        executeScheduled()
+
+      case arrayDeque: ArrayDeque[_] =>
+        val runnables = arrayDeque.asInstanceOf[ArrayDeque[Runnable]]
+        // Rather than recursing, we can use a more efficient
+        // while loop. The value of the ThreadLocal will stay as
+        // an ArrayDeque until all the scheduled Runnables have been
+        // run.
+        while (!runnables.isEmpty) {
+          val runnable = runnables.removeFirst()
+          runnable.run()
+        }
+
+      case illegal => throw new IllegalStateException(
+        s"Unsupported trampoline ThreadLocal value: $illegal")
     }
 
     def reportFailure(t: Throwable): Unit = t.printStackTrace()
   }
-
 }
