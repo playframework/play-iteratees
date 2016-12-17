@@ -667,16 +667,18 @@ trait Iteratee[E, +A] {
       }(dec)
     }(dec)
 
-  def joinConcatI[AIn, X](implicit in: A <:< Iteratee[E, AIn], p: E => scala.collection.TraversableLike[X, E], bf: scala.collection.generic.CanBuildFrom[E, X, E]): Iteratee[E, AIn] = this.flatMapTraversable {
-    in(_).pureFlatFold[E, AIn] {
-      case Step.Done(a, e) => Done(a, e)
-      case Step.Cont(k) => k(Input.EOF).pureFlatFold[E, AIn] {
+  def joinConcatI[AIn, X](implicit in: A <:< Iteratee[E, AIn], p: E => scala.collection.TraversableLike[X, E], bf: scala.collection.generic.CanBuildFrom[E, X, E]): Iteratee[E, AIn] = {
+    this.flatMapTraversable {
+      in(_).pureFlatFold[E, AIn] {
         case Step.Done(a, e) => Done(a, e)
-        case Step.Cont(k) => Error("divergent inner iteratee on joinI after EOF", Input.EOF)
-        case Step.Error(msg, e) => Error(msg, Input.EOF)
+        case Step.Cont(k) => k(Input.EOF).pureFlatFold[E, AIn] {
+          case Step.Done(a, e) => Done(a, e)
+          case Step.Cont(k) => Error("divergent inner iteratee on joinI after EOF", Input.EOF)
+          case Step.Error(msg, e) => Error(msg, Input.EOF)
+        }(dec)
+        case Step.Error(msg, e) => Error(msg, Input.Empty)
       }(dec)
-      case Step.Error(msg, e) => Error(msg, Input.Empty)
-    }(dec)
+    }
   }
 }
 
@@ -698,8 +700,9 @@ private sealed trait StepIteratee[E, A] extends Iteratee[E, A] with Step[E, A] {
     }(ec /* executeFuture handles preparation */ )
   }
 
-  final override def pureFold[B](folder: Step[E, A] => B)(implicit ec: ExecutionContext): Future[B] = Future(folder(immediateUnflatten))(
-    ec /* Future.apply handles preparation */ )
+  final override def pureFold[B](folder: Step[E, A] => B)(implicit ec: ExecutionContext): Future[B] = Future {
+    folder(immediateUnflatten)
+  }(ec /* Future.apply handles preparation */ )
 
   protected[play] final override def foldNoEC[B](folder: Step[E, A] => Future[B]): Future[B] = folder(immediateUnflatten)
 
@@ -744,7 +747,8 @@ private final class ErrorIteratee[E](msg: String, e: Input[E]) extends Step.Erro
 private final class FutureIteratee[E, A](
   itFut: Future[Iteratee[E, A]]) extends Iteratee[E, A] {
 
-  def fold[B](folder: Step[E, A] => Future[B])(implicit ec: ExecutionContext): Future[B] = itFut.flatMap { _.fold(folder)(ec.prepare()) }(dec)
+  def fold[B](folder: Step[E, A] => Future[B])(implicit ec: ExecutionContext): Future[B] =
+    itFut.flatMap { _.fold(folder)(ec.prepare()) }(dec)
 
 }
 
