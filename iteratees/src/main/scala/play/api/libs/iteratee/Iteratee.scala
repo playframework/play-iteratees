@@ -422,9 +422,11 @@ trait Iteratee[E, +A] {
    * $paramEcMultiple
    * @return a [[scala.concurrent.Future]] of a value extracted by calling the appropriate provided function
    */
-  def fold1[B](done: (A, Input[E]) => Future[B],
+  def fold1[B](
+    done: (A, Input[E]) => Future[B],
     cont: (Input[E] => Iteratee[E, A]) => Future[B],
-    error: (String, Input[E]) => Future[B])(implicit ec: ExecutionContext): Future[B] = fold({
+    error: (String, Input[E]) => Future[B]
+  )(implicit ec: ExecutionContext): Future[B] = fold({
     case Step.Done(a, e) => done(a, e)
     case Step.Cont(k) => cont(k)
     case Step.Error(msg, e) => error(msg, e)
@@ -499,9 +501,11 @@ trait Iteratee[E, +A] {
    *
    * $paramEcSingle
    */
-  def flatFold[B, C](done: (A, Input[E]) => Future[Iteratee[B, C]],
+  def flatFold[B, C](
+    done: (A, Input[E]) => Future[Iteratee[B, C]],
     cont: (Input[E] => Iteratee[E, A]) => Future[Iteratee[B, C]],
-    error: (String, Input[E]) => Future[Iteratee[B, C]])(implicit ec: ExecutionContext): Iteratee[B, C] = Iteratee.flatten(fold1(done, cont, error)(ec))
+    error: (String, Input[E]) => Future[Iteratee[B, C]]
+  )(implicit ec: ExecutionContext): Iteratee[B, C] = Iteratee.flatten(fold1(done, cont, error)(ec))
 
   /**
    *
@@ -745,7 +749,8 @@ private final class ErrorIteratee[E](msg: String, e: Input[E]) extends Step.Erro
  * Used by `Iteratee.flatten`.
  */
 private final class FutureIteratee[E, A](
-  itFut: Future[Iteratee[E, A]]) extends Iteratee[E, A] {
+    itFut: Future[Iteratee[E, A]]
+) extends Iteratee[E, A] {
 
   def fold[B](folder: Step[E, A] => Future[B])(implicit ec: ExecutionContext): Future[B] =
     itFut.flatMap { _.fold(folder)(ec.prepare()) }(dec)

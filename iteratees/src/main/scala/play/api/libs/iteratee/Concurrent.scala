@@ -444,7 +444,8 @@ object Concurrent {
   def unicast[E](
     onStart: Channel[E] => Unit,
     onComplete: => Unit = (),
-    onError: (String, Input[E]) => Unit = (_: String, _: Input[E]) => ())(implicit ec: ExecutionContext) = new Enumerator[E] {
+    onError: (String, Input[E]) => Unit = (_: String, _: Input[E]) => ()
+  )(implicit ec: ExecutionContext) = new Enumerator[E] {
     implicit val pec = ec.prepare()
 
     import scala.concurrent.stm.Ref

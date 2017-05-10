@@ -247,7 +247,8 @@ object EnumeratorsSpec extends Specification
             completeCount.incrementAndGet()
             completeDone.countDown()
           },
-          (_: String, _: Input[(Boolean, Int)]) => errorCount.incrementAndGet())(callbackEC)
+          (_: String, _: Input[(Boolean, Int)]) => errorCount.incrementAndGet()
+        )(callbackEC)
         mustEnumerateTo((true, 1), (false, 2), (false, 3))(enumerator)
         completeDone.await(30, TimeUnit.SECONDS) must beTrue
         completeCount.get() must equalTo(1)

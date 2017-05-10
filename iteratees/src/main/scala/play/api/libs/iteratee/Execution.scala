@@ -92,7 +92,8 @@ object Execution {
           runnables.addLast(runnable)
 
         case illegal => throw new IllegalStateException(
-          s"Unsupported trampoline ThreadLocal value: $illegal")
+          s"Unsupported trampoline ThreadLocal value: $illegal"
+        )
       }
     }
 
@@ -123,7 +124,8 @@ object Execution {
         }
 
       case illegal => throw new IllegalStateException(
-        s"Unsupported trampoline ThreadLocal value: $illegal")
+        s"Unsupported trampoline ThreadLocal value: $illegal"
+      )
     }
 
     def reportFailure(t: Throwable): Unit = t.printStackTrace()

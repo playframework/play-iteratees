@@ -153,7 +153,8 @@ object Enumeratee {
         for (
           it1_ <- it1.feed(in);
           it2_ <- it2.feed(in)
-        ) yield getNext(it1_, it2_))
+        ) yield getNext(it1_, it2_)
+      )
 
     }
 

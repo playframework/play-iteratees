@@ -29,9 +29,11 @@ object Parsing {
 
     def applyOn[A](inner: Iteratee[MatchInfo[Array[Byte]], A]): Iteratee[Array[Byte], Iteratee[MatchInfo[Array[Byte]], A]] = {
 
-      Iteratee.flatten(inner.fold1((a, e) => Future.successful(Done(Done(a, e), Input.Empty: Input[Array[Byte]])),
+      Iteratee.flatten(inner.fold1(
+        (a, e) => Future.successful(Done(Done(a, e), Input.Empty: Input[Array[Byte]])),
         k => Future.successful(Cont(step(Array[Byte](), Cont(k)))),
-        (err, r) => throw new Exception())(dec))
+        (err, r) => throw new Exception()
+      )(dec))
 
     }
     def scan(previousMatches: List[MatchInfo[Array[Byte]]], piece: Array[Byte], startScan: Int): (List[MatchInfo[Array[Byte]]], Array[Byte]) = {
@@ -69,26 +71,30 @@ object Parsing {
           val all = rest ++ chunk
           def inputOrEmpty(a: Array[Byte]) = if (a.isEmpty) Input.Empty else Input.El(a)
 
-          Iteratee.flatten(inner.fold1((a, e) => Future.successful(Done(Done(a, e), inputOrEmpty(rest))),
+          Iteratee.flatten(inner.fold1(
+            (a, e) => Future.successful(Done(Done(a, e), inputOrEmpty(rest))),
             k => {
               val (result, suffix) = scan(Nil, all, 0)
               val fed = result.filter(!_.content.isEmpty).foldLeft(Future.successful(Array[Byte]() -> Cont(k))) { (p, m) =>
-                p.flatMap(i => i._2.fold1((a, e) => Future.successful((i._1 ++ m.content, Done(a, e))),
+                p.flatMap(i => i._2.fold1(
+                  (a, e) => Future.successful((i._1 ++ m.content, Done(a, e))),
                   k => Future.successful((i._1, k(Input.El(m)))),
-                  (err, e) => throw new Exception())(dec)
-                )(dec)
+                  (err, e) => throw new Exception()
+                )(dec))(dec)
               }
               fed.flatMap {
-                case (ss, i) => i.fold1((a, e) => Future.successful(Done(Done(a, e), inputOrEmpty(ss ++ suffix))),
+                case (ss, i) => i.fold1(
+                  (a, e) => Future.successful(Done(Done(a, e), inputOrEmpty(ss ++ suffix))),
                   k => Future.successful(Cont[Array[Byte], Iteratee[MatchInfo[Array[Byte]], A]]((in: Input[Array[Byte]]) => in match {
                     case Input.EOF => Done(k(Input.El(Unmatched(suffix))), Input.EOF) //suffix maybe empty
                     case other => step(ss ++ suffix, Cont(k))(other)
                   })),
-                  (err, e) => throw new Exception())(dec)
+                  (err, e) => throw new Exception()
+                )(dec)
               }(dec)
             },
-            (err, e) => throw new Exception())(dec)
-          )
+            (err, e) => throw new Exception()
+          )(dec))
       }
     }
   }

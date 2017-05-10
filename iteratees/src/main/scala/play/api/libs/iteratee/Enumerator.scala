@@ -494,9 +494,11 @@ object Enumerator {
    * @param onError Called when an error occurs in the iteratee
    * $paramEcMultiple
    */
-  def fromCallback1[E](retriever: Boolean => Future[Option[E]],
+  def fromCallback1[E](
+    retriever: Boolean => Future[Option[E]],
     onComplete: () => Unit = () => (),
-    onError: (String, Input[E]) => Unit = (_: String, _: Input[E]) => ())(implicit ec: ExecutionContext) = new Enumerator[E] {
+    onError: (String, Input[E]) => Unit = (_: String, _: Input[E]) => ()
+  )(implicit ec: ExecutionContext) = new Enumerator[E] {
     private val pec = ec.prepare()
     def apply[A](it: Iteratee[E, A]): Future[Iteratee[E, A]] = {
 

@@ -63,7 +63,7 @@ object SubscriberIterateeSpec extends Specification {
           sub.request(1)
           next() must_== OnComplete
       }
-      await(result) must_== ()
+      await(result) must_== ((): Unit)
     }
 
     "publish events in batches in response to demand" in new TestEnv {
@@ -79,7 +79,7 @@ object SubscriberIterateeSpec extends Specification {
           next() must_== OnNext(30)
           next() must_== OnComplete
       }
-      await(result) must_== ()
+      await(result) must_== ((): Unit)
     }
 
     "publish events all at once in response to demand" in new TestEnv {
@@ -93,7 +93,7 @@ object SubscriberIterateeSpec extends Specification {
           next() must_== OnNext(30)
           next() must_== OnComplete
       }
-      await(result) must_== ()
+      await(result) must_== ((): Unit)
     }
 
     "become done when the stream is cancelled" in new TestEnv {
