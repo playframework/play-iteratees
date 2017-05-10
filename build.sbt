@@ -1,4 +1,6 @@
-val specsVersion = "3.8.6"
+import interplay.ScalaVersions._
+
+val specsVersion = "3.8.9"
 val specsBuild = Seq(
   "specs2-core",
   "specs2-junit",
@@ -10,8 +12,8 @@ lazy val `play-iteratees` = project
   .enablePlugins(PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings(
-    scalaVersion := "2.12.1",
-    crossScalaVersions := Seq("2.12.1", "2.11.8"),
+    scalaVersion := scala212,
+    crossScalaVersions := Seq(scala212, scala211),
     libraryDependencies ++= Seq(
       "org.scala-stm" %% "scala-stm" % "0.8"
     ) ++ specsBuild.map(_ % Test)
@@ -22,8 +24,8 @@ lazy val `play-iteratees-reactive-streams` = project
   .enablePlugins(PlayLibrary)
   .settings(scalariformSettings: _*)
   .settings(
-    scalaVersion := "2.12.1",
-    crossScalaVersions := Seq("2.12.1", "2.11.8"),
+    scalaVersion := scala212,
+    crossScalaVersions := Seq(scala212, scala211),
     libraryDependencies ++= Seq(
       "org.reactivestreams" % "reactive-streams" % "1.0.0"
     ) ++ specsBuild.map(_ % Test)
@@ -33,8 +35,8 @@ lazy val `play-iteratees-root` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`play-iteratees`, `play-iteratees-reactive-streams`)
   .settings(
-    scalaVersion := "2.12.1",
-    crossScalaVersions := Seq("2.12.1", "2.11.8")
+    scalaVersion := scala212,
+    crossScalaVersions := Seq(scala212, scala211)
   )
 
 playBuildRepoName in ThisBuild := "play-iteratees"
