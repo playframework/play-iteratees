@@ -166,7 +166,8 @@ object ConcurrentSpec extends Specification
             c.eofAndEnd()
           },
           () => completeCount.incrementAndGet(),
-          (_: String, _: Input[String]) => errorCount.incrementAndGet())(unicastEC)
+          (_: String, _: Input[String]) => errorCount.incrementAndGet()
+        )(unicastEC)
         val promise = (enumerator |>> Iteratee.fold[String, String]("")(_ ++ _)(foldEC)).flatMap(_.run)
 
         Await.result(promise, Duration.Inf) must equalTo(a + b)

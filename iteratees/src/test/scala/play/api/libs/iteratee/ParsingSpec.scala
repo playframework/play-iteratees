@@ -25,7 +25,8 @@ object ParsingSpec extends Specification
         }.mkString(", ")
 
         result must equalTo(
-          "Unmatched(xxkxc), Matched(kiki), Unmatched(xc), Matched(kiki), Unmatched(ococ), Matched(kiki), Unmatched(sdods), Matched(kiki), Unmatched(sdks), Unmatched(dloii)")
+          "Unmatched(xxkxc), Matched(kiki), Unmatched(xc), Matched(kiki), Unmatched(ococ), Matched(kiki), Unmatched(sdods), Matched(kiki), Unmatched(sdks), Unmatched(dloii)"
+        )
       }
     }
 
@@ -40,7 +41,8 @@ object ParsingSpec extends Specification
         }.mkString(", ")
 
         result must equalTo(
-          "Unmatched(xxkxc), Matched(kiki), Unmatched(xckikkico), Unmatched(c), Matched(kiki), Unmatched(sdkikods), Matched(kiki), Unmatched(sdksdlok), Unmatched(ii), Matched(kiki), Unmatched()")
+          "Unmatched(xxkxc), Matched(kiki), Unmatched(xckikkico), Unmatched(c), Matched(kiki), Unmatched(sdkikods), Matched(kiki), Unmatched(sdksdlok), Unmatched(ii), Matched(kiki), Unmatched()"
+        )
       }
     }
 

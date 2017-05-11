@@ -96,7 +96,8 @@ object IterateesSpec extends Specification
         mustTranslate3To(5)(it => Iteratee.flatten(it.fold1(
           (a, i) => Future.successful(Done(a + 2, i)),
           _ => ???,
-          (_, _) => ???)(foldEC)))
+          (_, _) => ???
+        )(foldEC)))
       }
     }
 
@@ -123,7 +124,8 @@ object IterateesSpec extends Specification
         mustTranslate3To(9)(_.flatFold(
           (_, _) => Future.successful(Done[Int, Int](9)),
           _ => ???,
-          (_, _) => ???)(foldEC))
+          (_, _) => ???
+        )(foldEC))
       }
     }
 
@@ -172,7 +174,8 @@ object IterateesSpec extends Specification
         await(Done(3, Input.El(List(1, 2))).flatMapTraversable(_ => Done[List[Int], Int](4, Input.El(List(3, 4))))(
           implicitly[List[Int] => scala.collection.TraversableLike[Int, List[Int]]],
           implicitly[scala.collection.generic.CanBuildFrom[List[Int], Int, List[Int]]],
-          flatMapEC).unflatten) must equalTo(Step.Done(4, Input.El(List(1, 2, 3, 4))))
+          flatMapEC
+        ).unflatten) must equalTo(Step.Done(4, Input.El(List(1, 2, 3, 4))))
       }
     }
 

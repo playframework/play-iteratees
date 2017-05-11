@@ -19,7 +19,8 @@ private[streams] trait FutureSubscriptionFactory[T] extends SubscriptionFactory[
 
   override def createSubscription[U >: T](
     subr: Subscriber[U],
-    onSubscriptionEnded: SubscriptionHandle[U] => Unit) = {
+    onSubscriptionEnded: SubscriptionHandle[U] => Unit
+  ) = {
     new FutureSubscription[T, U](fut, subr, onSubscriptionEnded)
   }
 
@@ -29,7 +30,8 @@ private[streams] trait FutureSubscriptionFactory[T] extends SubscriptionFactory[
  * Adapts an Future to a Publisher.
  */
 private[streams] final class FuturePublisher[T](
-  val fut: Future[T]) extends RelaxedPublisher[T] with FutureSubscriptionFactory[T]
+  val fut: Future[T]
+) extends RelaxedPublisher[T] with FutureSubscriptionFactory[T]
 
 private[streams] object FutureSubscription {
   /**
@@ -61,7 +63,8 @@ import FutureSubscription._
 private[streams] class FutureSubscription[T, U >: T](
   fut: Future[T],
   subr: Subscriber[U],
-  onSubscriptionEnded: SubscriptionHandle[U] => Unit)
+  onSubscriptionEnded: SubscriptionHandle[U] => Unit
+)
     extends StateMachine[State](initialState = AwaitingRequest)
     with Subscription with SubscriptionHandle[U] {
 
