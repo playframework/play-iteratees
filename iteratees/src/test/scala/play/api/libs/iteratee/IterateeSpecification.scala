@@ -69,7 +69,7 @@ trait IterateeSpecification {
   def timeout[A](a: => A, d: Duration)(implicit e: ExecutionContext): Future[A] = {
     val p = Promise[A]()
     timer.schedule(new java.util.TimerTask {
-      def run() {
+      def run(): Unit = {
         p.complete(Try(a))
       }
     }, d.toMillis)
