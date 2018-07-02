@@ -224,7 +224,7 @@ object Enumerator {
       val attending: Ref[Option[Seq[Boolean]]] = Ref(Some(es.map(_ => true)))
       val result = Promise[Iteratee[E, A]]()
 
-      def redeemResultIfNotYet(r: Iteratee[E, A]) {
+      def redeemResultIfNotYet(r: Iteratee[E, A]): Unit = {
         if (attending.single.transformIfDefined { case Some(_) => None })
           result.success(r)
       }
@@ -298,7 +298,7 @@ object Enumerator {
       val attending: Ref[Option[(Boolean, Boolean)]] = Ref(Some(true -> true))
       val result = Promise[Iteratee[E2, A]]()
 
-      def redeemResultIfNotYet(r: Iteratee[E2, A]) {
+      def redeemResultIfNotYet(r: Iteratee[E2, A]): Unit = {
         if (attending.single.transformIfDefined { case Some(_) => None })
           result.success(r)
       }
@@ -504,7 +504,7 @@ object Enumerator {
 
       val iterateeP = Promise[Iteratee[E, A]]()
 
-      def step(it: Iteratee[E, A], initial: Boolean = false) {
+      def step(it: Iteratee[E, A], initial: Boolean = false): Unit = {
 
         val next = it.fold {
           case Step.Cont(k) => {
@@ -612,17 +612,17 @@ object Enumerator {
   def outputStream(a: java.io.OutputStream => Unit)(implicit ec: ExecutionContext): Enumerator[Array[Byte]] = {
     Concurrent.unicast[Array[Byte]] { channel =>
       val outputStream = new java.io.OutputStream() {
-        override def close() {
+        override def close(): Unit = {
           channel.end()
         }
-        override def flush() {}
-        override def write(value: Int) {
+        override def flush(): Unit = {}
+        override def write(value: Int): Unit = {
           channel.push(Array(value.toByte))
         }
-        override def write(buffer: Array[Byte]) {
+        override def write(buffer: Array[Byte]): Unit = {
           write(buffer, 0, buffer.length)
         }
-        override def write(buffer: Array[Byte], start: Int, count: Int) {
+        override def write(buffer: Array[Byte], start: Int, count: Int): Unit = {
           channel.push(buffer.slice(start, start + count))
         }
       }

@@ -23,7 +23,7 @@ object Concurrent {
 
     val p = Promise[A]()
     timer.schedule(new java.util.TimerTask {
-      def run() {
+      def run(): Unit = {
         p.success(v)
       }
     }, unit.toMillis(delay))
@@ -40,14 +40,14 @@ object Concurrent {
      *
      * @param chunk The chunk to push
      */
-    def push(chunk: Input[E])
+    def push(chunk: Input[E]): Unit
 
     /**
      * Push an item into this channel
      *
      * @param item The item to push
      */
-    def push(item: E) { push(Input.El(item)) }
+    def push(item: E): Unit = { push(Input.El(item)) }
 
     /**
      * Send a failure to this channel.  This results in any promises that the enumerator associated with this channel
@@ -60,7 +60,7 @@ object Concurrent {
      *
      * @param e The failure.
      */
-    def end(e: Throwable)
+    def end(e: Throwable): Unit
 
     /**
      * End the input for this channel.  This results in any promises that the enumerator associated with this channel
@@ -74,12 +74,12 @@ object Concurrent {
      * invocation, that is, subsequent calls to end will change the behaviour of attaching new iteratees to the
      * broadcast enumerator.
      */
-    def end()
+    def end(): Unit
 
     /**
      * Send an EOF to the channel, and then end the input for the channel.
      */
-    def eofAndEnd() {
+    def eofAndEnd(): Unit = {
       push(Input.EOF)
       end()
     }
@@ -546,7 +546,7 @@ object Concurrent {
     /**
      * Close the broadcasting enumerator.
      */
-    def close()
+    def close(): Unit
 
     /**
      * Whether this broadcaster is closed.
@@ -630,7 +630,7 @@ object Concurrent {
 
       def noCords() = iteratees.single().isEmpty
 
-      def close() {
+      def close(): Unit = {
         closeFlag = true
       }
 
