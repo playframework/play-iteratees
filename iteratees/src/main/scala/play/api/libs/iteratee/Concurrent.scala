@@ -287,8 +287,6 @@ object Concurrent {
    * $paramEcSingle
    */
   def buffer[E](maxBuffer: Int, length: Input[E] => Int)(implicit ec: ExecutionContext): Enumeratee[E, E] = new Enumeratee[E, E] {
-    val pec = ec.prepare()
-
     import scala.collection.immutable.Queue
     import scala.concurrent.stm._
     import play.api.libs.iteratee.Enumeratee.CheckDone
@@ -322,7 +320,7 @@ object Concurrent {
           Iteratee.flatten(last.future)
 
         case other =>
-          Iteratee.flatten(Future(length(other))(pec).map { chunkLength =>
+          Iteratee.flatten(Future(length(other))(ec).map { chunkLength =>
             val s = state.single.getAndTransform {
               case Queueing(q, l) if maxBuffer > 0 && l <= maxBuffer => Queueing(q.enqueue(other), l + chunkLength)
 
@@ -446,8 +444,6 @@ object Concurrent {
     onComplete: => Unit = (),
     onError: (String, Input[E]) => Unit = (_: String, _: Input[E]) => ()
   )(implicit ec: ExecutionContext) = new Enumerator[E] {
-    implicit val pec = ec.prepare()
-
     import scala.concurrent.stm.Ref
 
     def apply[A](it: Iteratee[E, A]): Future[Iteratee[E, A]] = {
@@ -491,13 +487,13 @@ object Concurrent {
                 val next = k(item)
                 next.fold {
                   case Step.Done(a, in) => {
-                    Future(onComplete)(pec).map { _ =>
+                    Future(onComplete)(ec).map { _ =>
                       promise.success(next)
                       None
                     }(dec)
                   }
                   case Step.Error(msg, e) =>
-                    Future(onError(msg, e))(pec).map { _ =>
+                    Future(onError(msg, e))(ec).map { _ =>
                       promise.success(next)
                       None
                     }(dec)
@@ -512,7 +508,7 @@ object Concurrent {
           }(dec)
         }
       }
-      Future(onStart(pushee))(pec).flatMap(_ => promise.future)(dec)
+      Future(onStart(pushee))(ec).flatMap(_ => promise.future)(dec)
     }
 
   }
@@ -529,8 +525,7 @@ object Concurrent {
    *         input, and the broadcaster.
    */
   def broadcast[E](e: Enumerator[E], interestIsDownToZero: Broadcaster => Unit = _ => ())(implicit ec: ExecutionContext): (Enumerator[E], Broadcaster) = {
-    val pec = ec.prepare()
-    lazy val h: Hub[E] = hub(e, () => interestIsDownToZero(h))(pec)
+    lazy val h: Hub[E] = hub(e, () => interestIsDownToZero(h))(ec)
     (h.getPatchCord(), h)
   }
 
@@ -562,8 +557,6 @@ object Concurrent {
   }
 
   private def hub[E](e: Enumerator[E], interestIsDownToZero: () => Unit = () => ())(implicit ec: ExecutionContext): Hub[E] = {
-    val pec = ec.prepare()
-
     import scala.concurrent.stm._
 
     val iteratees: Ref[List[(Iteratee[E, _], Promise[Iteratee[E, _]])]] = Ref(List())
@@ -621,7 +614,7 @@ object Concurrent {
 
         }
         def result(): Iteratee[E, Unit] = if (in == Input.EOF || closeFlag) Done((), Input.Empty) else Cont(step)
-        if (downToZero) Future(interestIsDownToZero())(pec).map(_ => result())(dec) else Future.successful(result())
+        if (downToZero) Future(interestIsDownToZero())(ec).map(_ => result())(dec) else Future.successful(result())
 
       }(dec))
     }
@@ -707,8 +700,6 @@ object Concurrent {
    * $paramEcSingle
    */
   def patchPanel[E](patcher: PatchPanel[E] => Unit)(implicit ec: ExecutionContext): Enumerator[E] = new Enumerator[E] {
-    val pec = ec.prepare()
-
     import scala.concurrent.stm._
 
     def apply[A](it: Iteratee[E, A]): Future[Iteratee[E, A]] = {
@@ -788,7 +779,7 @@ object Concurrent {
             false
           })
         }
-      }))(pec).flatMap(_ => result.future)(dec)
+      }))(ec).flatMap(_ => result.future)(dec)
 
     }
   }

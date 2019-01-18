@@ -4,7 +4,6 @@
 package play.api.libs.iteratee
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.control.NonFatal
 import play.api.libs.iteratee.Execution.Implicits.{ defaultExecutionContext => dec }
 import play.api.libs.iteratee.internal.{ eagerFuture, executeFuture, executeIteratee, prepared }
 
@@ -53,12 +52,11 @@ object Iteratee {
    * $paramEcSingle
    */
   def foldM[E, A](state: A)(f: (A, E) => Future[A])(implicit ec: ExecutionContext): Iteratee[E, A] = {
-    val pec = ec.prepare()
     def step(s: A)(i: Input[E]): Iteratee[E, A] = i match {
 
       case Input.EOF => Done(s, Input.EOF)
       case Input.Empty => Cont[E, A](step(s))
-      case Input.El(e) => { val newS = executeFuture(f(s, e))(pec); flatten(newS.map(s1 => Cont[E, A](step(s1)))(dec)) }
+      case Input.El(e) => { val newS = executeFuture(f(s, e))(ec); flatten(newS.map(s1 => Cont[E, A](step(s1)))(dec)) }
     }
     (Cont[E, A](step(state)))
   }
@@ -72,12 +70,11 @@ object Iteratee {
    * $paramEcSingle
    */
   def fold2[E, A](state: A)(f: (A, E) => Future[(A, Boolean)])(implicit ec: ExecutionContext): Iteratee[E, A] = {
-    val pec = ec.prepare()
     def step(s: A)(i: Input[E]): Iteratee[E, A] = i match {
 
       case Input.EOF => Done(s, Input.EOF)
       case Input.Empty => Cont[E, A](step(s))
-      case Input.El(e) => { val newS = executeFuture(f(s, e))(pec); flatten(newS.map[Iteratee[E, A]] { case (s1, done) => if (!done) Cont[E, A](step(s1)) else Done(s1, Input.Empty) }(dec)) }
+      case Input.El(e) => { val newS = executeFuture(f(s, e))(ec); flatten(newS.map[Iteratee[E, A]] { case (s1, done) => if (!done) Cont[E, A](step(s1)) else Done(s1, Input.Empty) }(dec)) }
     }
     (Cont[E, A](step(state)))
   }
@@ -93,7 +90,7 @@ object Iteratee {
    * $paramEcSingle
    */
   def fold1[E, A](state: Future[A])(f: (A, E) => Future[A])(implicit ec: ExecutionContext): Iteratee[E, A] = {
-    prepared(ec)(pec => flatten(state.map(s => foldM(s)(f)(pec))(dec)))
+    prepared(ec)(pec => flatten(state.map(s => foldM(s)(f)(ec))(dec)))
   }
 
   /**
@@ -545,8 +542,7 @@ trait Iteratee[E, +A] {
       case Step.Error(msg, e) => Error(msg, e)
     }(dec)
     case Step.Cont(k) => {
-      implicit val pec = ec.prepare()
-      Cont((in: Input[E]) => executeIteratee(k(in))(dec).flatMap(f)(pec))
+      Cont((in: Input[E]) => executeIteratee(k(in))(dec).flatMap(f)(ec))
     }
     case Step.Error(msg, e) => Error(msg, e)
   }
@@ -572,10 +568,9 @@ trait Iteratee[E, +A] {
    * $paramEcSingle Note: input concatenation is performed in the iteratee default execution context, not in the user-supplied context.
    */
   def flatMapTraversable[B, X](f: A => Iteratee[E, B])(implicit p: E => scala.collection.TraversableLike[X, E], bf: scala.collection.generic.CanBuildFrom[E, X, E], ec: ExecutionContext): Iteratee[E, B] = {
-    val pec = ec.prepare()
     self.pureFlatFold {
       case Step.Done(a, Input.Empty) => f(a)
-      case Step.Done(a, e) => executeIteratee(f(a))(pec).pureFlatFold {
+      case Step.Done(a, e) => executeIteratee(f(a))(ec).pureFlatFold {
         case Step.Done(a, eIn) => {
           val fullIn = (e, eIn) match {
             case (Input.Empty, in) => in
@@ -590,7 +585,7 @@ trait Iteratee[E, +A] {
         case Step.Cont(k) => k(e)
         case Step.Error(msg, e) => Error(msg, e)
       }(dec)
-      case Step.Cont(k) => Cont((in: Input[E]) => k(in).flatMap(f)(pec))
+      case Step.Cont(k) => Cont((in: Input[E]) => k(in).flatMap(f)(ec))
       case Step.Error(msg, e) => Error(msg, e)
     }(dec)
   }
@@ -629,8 +624,7 @@ trait Iteratee[E, +A] {
    * @return
    */
   def recoverM[B >: A](pf: PartialFunction[Throwable, Future[B]])(implicit ec: ExecutionContext): Iteratee[E, B] = {
-    val pec = ec.prepare()
-    recoverWith { case t: Throwable if pf.isDefinedAt(t) => Iteratee.flatten(pf(t).map(b => Done[E, B](b))(pec)) }(ec)
+    recoverWith { case t: Throwable if pf.isDefinedAt(t) => Iteratee.flatten(pf(t).map(b => Done[E, B](b))(ec)) }(ec)
   }
 
   /**
@@ -642,8 +636,6 @@ trait Iteratee[E, +A] {
    * @return
    */
   def recoverWith[B >: A](pf: PartialFunction[Throwable, Iteratee[E, B]])(implicit ec: ExecutionContext): Iteratee[E, B] = {
-    implicit val pec = ec.prepare()
-
     def recoveringIteratee(it: Iteratee[E, A]): Iteratee[E, B] =
       Iteratee.flatten(it.pureFold[Iteratee[E, B]] {
         case Step.Cont(k) =>
@@ -653,7 +645,7 @@ trait Iteratee[E, +A] {
           throw new IterateeException(msg)
 
         case done => done.it
-      }(dec).recover(pf)(pec))
+      }(dec).recover(pf)(ec))
 
     recoveringIteratee(this)
   }
@@ -753,7 +745,7 @@ private final class FutureIteratee[E, A](
 ) extends Iteratee[E, A] {
 
   def fold[B](folder: Step[E, A] => Future[B])(implicit ec: ExecutionContext): Future[B] =
-    itFut.flatMap { _.fold(folder)(ec.prepare()) }(dec)
+    itFut.flatMap { _.fold(folder)(ec) }(dec)
 
 }
 

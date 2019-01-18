@@ -37,8 +37,7 @@ object IterateesSpec extends Specification
   def checkFutureFoldFailure[A, E](i: Iteratee[A, E]) = {
     mustExecute(1, 1) { (foldEC, folderEC) =>
       val e = new Exception("exception")
-      val preparedFolderEC = folderEC.prepare()
-      val result = ready(i.fold(_ => Future(throw e)(preparedFolderEC))(foldEC))
+      val result = ready(i.fold(_ => Future(throw e)(folderEC))(foldEC))
       result.value must equalTo(Some(Failure(e)))
     }
   }

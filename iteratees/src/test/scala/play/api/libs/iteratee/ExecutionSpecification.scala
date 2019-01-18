@@ -14,8 +14,7 @@ trait ExecutionSpecification {
 
   def testExecution[A](f: TestExecutionContext => A): A = {
     val ec = TestExecutionContext()
-    val result = ec.preparable(f(ec))
-    result
+    f(ec)
   }
 
   def testExecution[A](f: (TestExecutionContext, TestExecutionContext) => A): A = {

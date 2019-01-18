@@ -113,7 +113,7 @@ object IterateeStreams {
    * by iterateeDoneToPublisher to extract the value of a Done iteratee.
    */
   private def iterateeFoldToPublisher[T, U, V](iter: Iteratee[T, U], f: Step[T, U] => Future[V])(implicit ec: ExecutionContext): Publisher[V] = {
-    val fut: Future[V] = iter.fold(f)(ec.prepare)
+    val fut: Future[V] = iter.fold(f)(ec)
     val pubr: Publisher[V] = futureToPublisher(fut)
     pubr
   }

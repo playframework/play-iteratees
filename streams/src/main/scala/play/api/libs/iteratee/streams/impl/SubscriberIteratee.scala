@@ -55,13 +55,12 @@ private[streams] class SubscriberIteratee[T](subscriber: Subscriber[T]) extends 
 
   def fold[B](folder: (Step[T, Unit]) => Future[B])(implicit ec: ExecutionContext): Future[B] = {
     val promise = Promise[B]()
-    val pec = ec.prepare()
     exclusive {
       case NotSubscribed =>
-        state = awaitDemand(promise, folder, pec)
+        state = awaitDemand(promise, folder, ec)
         subscriber.onSubscribe(this)
       case NoDemand =>
-        state = awaitDemand(promise, folder, pec)
+        state = awaitDemand(promise, folder, ec)
       case AwaitingDemand(_, _) =>
         throw new IllegalStateException("fold invoked while already waiting for demand")
       case Demand(n) =>
@@ -70,9 +69,9 @@ private[streams] class SubscriberIteratee[T](subscriber: Subscriber[T]) extends 
         } else {
           state = Demand(n - 1)
         }
-        demand(promise, folder, pec)
+        demand(promise, folder, ec)
       case Cancelled =>
-        cancelled(promise, folder, pec)
+        cancelled(promise, folder, ec)
     }
 
     promise.future

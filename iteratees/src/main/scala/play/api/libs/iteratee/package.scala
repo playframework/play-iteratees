@@ -51,10 +51,7 @@ package play.api.libs.iteratee {
      * def myFunc(implicit ec: ExecutionContext) = prepared(ec)(pec => ...)
      * }}}
      */
-    def prepared[A](ec: ExecutionContext)(f: ExecutionContext => A): A = {
-      val pec = ec.prepare()
-      f(pec)
-    }
+    def prepared[A](ec: ExecutionContext)(f: ExecutionContext => A): A = f(ec)
 
     val identityFunc: (Any => Any) = (x: Any) => x
   }
