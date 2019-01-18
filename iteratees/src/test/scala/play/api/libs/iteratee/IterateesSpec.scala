@@ -172,7 +172,7 @@ object IterateesSpec extends Specification
     "concatenate unused input with flatMapTraversable" in {
       mustExecute(1) { flatMapEC =>
         await(Done(3, Input.El(List(1, 2))).flatMapTraversable(_ => Done[List[Int], Int](4, Input.El(List(3, 4))))(
-          implicitly[List[Int] => scala.collection.TraversableLike[Int, List[Int]]],
+          implicitly[List[Int] => play.api.libs.iteratee.ccompat.TraversableLike[Int, List[Int]]],
           implicitly[scala.collection.generic.CanBuildFrom[List[Int], Int, List[Int]]],
           flatMapEC
         ).unflatten) must equalTo(Step.Done(4, Input.El(List(1, 2, 3, 4))))

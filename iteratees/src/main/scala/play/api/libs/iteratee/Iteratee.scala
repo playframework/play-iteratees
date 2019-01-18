@@ -572,7 +572,7 @@ trait Iteratee[E, +A] {
    * @param f a function for transforming the computed result into an Iteratee
    * $paramEcSingle Note: input concatenation is performed in the iteratee default execution context, not in the user-supplied context.
    */
-  def flatMapTraversable[B, X](f: A => Iteratee[E, B])(implicit p: E => scala.collection.TraversableLike[X, E], bf: BuildFrom[E, X, E], ec: ExecutionContext): Iteratee[E, B] = {
+  def flatMapTraversable[B, X](f: A => Iteratee[E, B])(implicit p: E => play.api.libs.iteratee.ccompat.TraversableLike[X, E], bf: BuildFrom[E, X, E], ec: ExecutionContext): Iteratee[E, B] = {
     val pec = ec.prepare()
     self.pureFlatFold {
       case Step.Done(a, Input.Empty) => f(a)
@@ -672,7 +672,7 @@ trait Iteratee[E, +A] {
       }(dec)
     }(dec)
 
-  def joinConcatI[AIn, X](implicit in: A <:< Iteratee[E, AIn], p: E => scala.collection.TraversableLike[X, E], bf: BuildFrom[E, X, E]): Iteratee[E, AIn] = {
+  def joinConcatI[AIn, X](implicit in: A <:< Iteratee[E, AIn], p: E => play.api.libs.iteratee.ccompat.TraversableLike[X, E], bf: BuildFrom[E, X, E]): Iteratee[E, AIn] = {
     this.flatMapTraversable {
       in(_).pureFlatFold[E, AIn] {
         case Step.Done(a, e) => Done(a, e)

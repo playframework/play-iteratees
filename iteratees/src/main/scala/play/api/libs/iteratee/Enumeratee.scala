@@ -63,7 +63,7 @@ trait Enumeratee[From, To] {
    * Compose this Enumeratee with another Enumeratee, concatenating any input left by both Enumeratees when they
    * are done.
    */
-  def composeConcat[X](other: Enumeratee[To, To])(implicit p: To => scala.collection.TraversableLike[X, To], bf: BuildFrom[To, X, To]): Enumeratee[From, To] = {
+  def composeConcat[X](other: Enumeratee[To, To])(implicit p: To => play.api.libs.iteratee.ccompat.TraversableLike[X, To], bf: BuildFrom[To, X, To]): Enumeratee[From, To] = {
     new Enumeratee[From, To] {
       def applyOn[A](iteratee: Iteratee[To, A]): Iteratee[From, Iteratee[To, A]] = {
         parent.applyOn(other.applyOn(iteratee).joinConcatI)
@@ -74,7 +74,7 @@ trait Enumeratee[From, To] {
   /**
    * Alias for `composeConcat`
    */
-  def >+>[X](other: Enumeratee[To, To])(implicit p: To => scala.collection.TraversableLike[X, To], bf: BuildFrom[To, X, To]): Enumeratee[From, To] = composeConcat[X](other)
+  def >+>[X](other: Enumeratee[To, To])(implicit p: To => play.api.libs.iteratee.ccompat.TraversableLike[X, To], bf: BuildFrom[To, X, To]): Enumeratee[From, To] = composeConcat[X](other)
 
 }
 

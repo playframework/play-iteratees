@@ -15,11 +15,11 @@ object Traversable {
    * A partially-applied function returned by the `head` method.
    */
   trait Head[E] {
-    def apply[A](implicit p: E => scala.collection.TraversableLike[A, E]): Iteratee[E, Option[A]]
+    def apply[A](implicit p: E => play.api.libs.iteratee.ccompat.TraversableLike[A, E]): Iteratee[E, Option[A]]
   }
 
   def head[E] = new Head[E] {
-    def apply[A](implicit p: E => scala.collection.TraversableLike[A, E]): Iteratee[E, Option[A]] = {
+    def apply[A](implicit p: E => play.api.libs.iteratee.ccompat.TraversableLike[A, E]): Iteratee[E, Option[A]] = {
 
       def step: K[E, Option[A]] = {
         case Input.Empty => Cont(step)
@@ -31,7 +31,7 @@ object Traversable {
     }
   }
 
-  def takeUpTo[M](count: Long)(implicit p: M => scala.collection.TraversableLike[_, M]): Enumeratee[M, M] = new Enumeratee[M, M] {
+  def takeUpTo[M](count: Long)(implicit p: M => play.api.libs.iteratee.ccompat.TraversableLike[_, M]): Enumeratee[M, M] = new Enumeratee[M, M] {
 
     def applyOn[A](it: Iteratee[M, A]): Iteratee[M, Iteratee[M, A]] = {
 
@@ -58,7 +58,7 @@ object Traversable {
     }
   }
 
-  def take[M](count: Int)(implicit p: M => scala.collection.TraversableLike[_, M]): Enumeratee[M, M] = new Enumeratee[M, M] {
+  def take[M](count: Int)(implicit p: M => play.api.libs.iteratee.ccompat.TraversableLike[_, M]): Enumeratee[M, M] = new Enumeratee[M, M] {
 
     def applyOn[A](it: Iteratee[M, A]): Iteratee[M, Iteratee[M, A]] = {
 
@@ -95,7 +95,7 @@ object Traversable {
    * @param p The predicate to split input on.
    * $paramEcSingle
    */
-  def splitOnceAt[M, E](p: E => Boolean)(implicit traversableLike: M => scala.collection.TraversableLike[E, M], ec: ExecutionContext): Enumeratee[M, M] = new CheckDone[M, M] {
+  def splitOnceAt[M, E](p: E => Boolean)(implicit traversableLike: M => play.api.libs.iteratee.ccompat.TraversableLike[E, M], ec: ExecutionContext): Enumeratee[M, M] = new CheckDone[M, M] {
     val pec = ec.prepare()
 
     def step[A](k: K[M, A]): K[M, Iteratee[M, A]] = {
@@ -117,7 +117,7 @@ object Traversable {
 
   }
 
-  def drop[M](count: Int)(implicit p: M => scala.collection.TraversableLike[_, M]): Enumeratee[M, M] = new Enumeratee[M, M] {
+  def drop[M](count: Int)(implicit p: M => play.api.libs.iteratee.ccompat.TraversableLike[_, M]): Enumeratee[M, M] = new Enumeratee[M, M] {
 
     def applyOn[A](inner: Iteratee[M, A]): Iteratee[M, Iteratee[M, A]] = {
 
