@@ -628,16 +628,16 @@ object Concurrent {
 
     new Hub[E] {
 
-      def noCords() = iteratees.single().isEmpty
+      def noCords(): Boolean = iteratees.single().isEmpty
 
       def close(): Unit = {
         closeFlag = true
       }
 
-      def closed() = closeFlag
+      def closed(): Boolean = closeFlag
 
       val redeemed = Ref(None: Option[Try[Iteratee[E, Unit]]])
-      def getPatchCord() = new Enumerator[E] {
+      def getPatchCord(): Enumerator[E] = new Enumerator[E] {
 
         def apply[A](it: Iteratee[E, A]): Future[Iteratee[E, A]] = {
           val result = Promise[Iteratee[E, A]]()
@@ -819,8 +819,9 @@ object Concurrent {
               }
               case err => folder(err)
             }(ec)
-            toReturn.onFailure {
-              case e => doneIteratee.failure(e)
+            toReturn.onComplete {
+              case Failure(e) => doneIteratee.failure(e)
+              case _ =>
             }(dec)
             toReturn
           }
@@ -848,8 +849,9 @@ object Concurrent {
       val (consumeRemaining, remaining) = Concurrent.joined[E]
       result.success((a, remaining))
       consumeRemaining
-    }(dec)).onFailure {
-      case e => result.tryFailure(e)
+    }(dec)).onComplete {
+      case Failure(e) => result.tryFailure(e)
+      case _ =>
     }(dec)
 
     result.future

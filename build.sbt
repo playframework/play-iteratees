@@ -1,8 +1,8 @@
 import interplay.ScalaVersions._
 
-val scala213Version = "2.13.0-M3"
+val scala213Version = "2.13.0-M5"
 
-val specsVersion = "4.2.0"
+val specsVersion = "4.3.6"
 val specsBuild = Seq(
   "specs2-core",
   "specs2-junit",
@@ -11,7 +11,14 @@ val specsBuild = Seq(
 
 val commonSettings = scalariformSettings ++ Seq(
   scalaVersion := scala212,
-  crossScalaVersions := Seq(scala212, scala211, scala213Version)
+  crossScalaVersions := Seq(scala212, scala211, scala213Version),
+  unmanagedSourceDirectories in Compile += {
+    val sourceDir = (sourceDirectory in Compile).value
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) if n >= 13 => sourceDir / "scala-2.13+"
+      case _ => sourceDir / "scala-2.12-"
+    }
+  }
 )
 
 lazy val `play-iteratees` = project
@@ -20,7 +27,7 @@ lazy val `play-iteratees` = project
   .settings(commonSettings: _*)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-stm" %% "scala-stm" % "0.8"
+      "org.scala-stm" %% "scala-stm" % "0.9"
     ) ++ specsBuild.map(_ % Test)
   )
 
