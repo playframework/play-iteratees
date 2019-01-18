@@ -8,6 +8,7 @@ import play.api.libs.iteratee.internal.{ executeIteratee, executeFuture }
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.collection.compat._
 
 /**
  * Combines the roles of an Iteratee[From] and a Enumerator[To].  This allows adapting of streams to that modify input
@@ -62,7 +63,7 @@ trait Enumeratee[From, To] {
    * Compose this Enumeratee with another Enumeratee, concatenating any input left by both Enumeratees when they
    * are done.
    */
-  def composeConcat[X](other: Enumeratee[To, To])(implicit p: To => scala.collection.TraversableLike[X, To], bf: scala.collection.generic.CanBuildFrom[To, X, To]): Enumeratee[From, To] = {
+  def composeConcat[X](other: Enumeratee[To, To])(implicit p: To => scala.collection.TraversableLike[X, To], bf: BuildFrom[To, X, To]): Enumeratee[From, To] = {
     new Enumeratee[From, To] {
       def applyOn[A](iteratee: Iteratee[To, A]): Iteratee[From, Iteratee[To, A]] = {
         parent.applyOn(other.applyOn(iteratee).joinConcatI)
@@ -73,7 +74,7 @@ trait Enumeratee[From, To] {
   /**
    * Alias for `composeConcat`
    */
-  def >+>[X](other: Enumeratee[To, To])(implicit p: To => scala.collection.TraversableLike[X, To], bf: scala.collection.generic.CanBuildFrom[To, X, To]): Enumeratee[From, To] = composeConcat[X](other)
+  def >+>[X](other: Enumeratee[To, To])(implicit p: To => scala.collection.TraversableLike[X, To], bf: BuildFrom[To, X, To]): Enumeratee[From, To] = composeConcat[X](other)
 
 }
 

@@ -10,8 +10,12 @@ val specsBuild = Seq(
 ).map("org.specs2" %% _ % specsVersion)
 
 val commonSettings = scalariformSettings ++ Seq(
-  scalaVersion := scala212,
-  crossScalaVersions := Seq(scala212, scala211, scala213Version),
+  scalaVersion := "2.12.7",
+  crossScalaVersions := Seq(scalaVersion.value, scala211, scala213Version),
+  scalafixDependencies in ThisBuild += "org.scala-lang.modules" %% "scala-collection-migrations" % "0.2.1",
+  libraryDependencies +=  "org.scala-lang.modules" %% "scala-collection-compat" % "0.2.1",
+  addCompilerPlugin(scalafixSemanticdb),
+  scalacOptions ++= List("-Yrangepos", "-P:semanticdb:synthetics:on"),
   unmanagedSourceDirectories in Compile += {
     val sourceDir = (sourceDirectory in Compile).value
     CrossVersion.partialVersion(scalaVersion.value) match {
