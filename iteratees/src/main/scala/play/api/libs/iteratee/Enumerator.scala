@@ -10,6 +10,7 @@ import play.api.libs.iteratee.internal.{ eagerFuture, executeFuture }
 import scala.concurrent.{ ExecutionContext, Future, Promise, blocking }
 import scala.util.{ Try, Success, Failure }
 import scala.language.reflectiveCalls
+import scala.collection.compat._
 
 /**
  * A producer which pushes input to an [[play.api.libs.iteratee.Iteratee]].
@@ -529,9 +530,10 @@ object Enumerator {
             Future.successful(None)
         }(dec)
 
-        next.onFailure {
-          case reason: Exception =>
+        next.onComplete {
+          case Failure(reason) =>
             onError(reason.getMessage(), Input.Empty)
+          case _ =>
         }(dec)
 
         next.onComplete {
@@ -664,7 +666,7 @@ object Enumerator {
    *  val enumerator: Enumerator[String] = Enumerator( scala.io.Source.fromFile("myfile.txt").getLines )
    * }}}
    */
-  def enumerate[E](traversable: TraversableOnce[E])(implicit ctx: scala.concurrent.ExecutionContext): Enumerator[E] = {
+  def enumerate[E](traversable: IterableOnce[E])(implicit ctx: scala.concurrent.ExecutionContext): Enumerator[E] = {
     val it = traversable.toIterator
     Enumerator.unfoldM[scala.collection.Iterator[E], E](it: scala.collection.Iterator[E])({ currentIt =>
       if (currentIt.hasNext)

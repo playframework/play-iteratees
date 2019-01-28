@@ -11,6 +11,7 @@ import scala.concurrent._
 import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
+import scala.collection.compat._
 
 object ConcurrentSpec extends Specification
     with IterateeSpecification with ExecutionSpecification {
@@ -83,7 +84,7 @@ object ConcurrentSpec extends Specification
             Concurrent.buffer(20, (_: Input[Int]) => 1)(bufferEC) |>>>
             slowIteratee
 
-        await(result) must_== ((1 to 10).to[List])
+        await(result) must_== ((1 to 10).to(List))
       }
     }
 

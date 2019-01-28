@@ -342,7 +342,7 @@ object EnumerateesSpec extends Specification
   "Enumeratee.grouped" should {
     "pass along what is consumed by the last folder iteratee on EOF" in {
       mustExecute(4, 3) { (splitEC, mapEC) =>
-        val upToSpace = Traversable.splitOnceAt[String, Char](c => c != '\n')(implicitly[String => scala.collection.TraversableLike[Char, String]], splitEC) &>> Iteratee.consume()
+        val upToSpace = Traversable.splitOnceAt[String, Char](c => c != '\n')(implicitly[String => play.api.libs.iteratee.ccompat.TraversableLike[Char, String]], splitEC) &>> Iteratee.consume()
 
         val result = (Enumerator("dasdasdas ", "dadadasda\nshouldb\neinnext") &> Enumeratee.grouped(upToSpace) ><> Enumeratee.map[String](_ + "|")(mapEC)) |>>> Iteratee.consume[String]()
         Await.result(result, Duration.Inf) must equalTo("dasdasdas dadadasda|shouldb|einnext|")

@@ -7,6 +7,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.control.NonFatal
 import play.api.libs.iteratee.Execution.Implicits.{ defaultExecutionContext => dec }
 import play.api.libs.iteratee.internal.{ eagerFuture, executeFuture, executeIteratee, prepared }
+import scala.collection.compat._
 
 /**
  * Various helper methods to construct, compose and traverse Iteratees.
@@ -100,7 +101,7 @@ object Iteratee {
    * A partially-applied function returned by the `consume` method.
    */
   trait Consume[E] {
-    def apply[B, That]()(implicit t: E => TraversableOnce[B], bf: scala.collection.generic.CanBuildFrom[E, B, That]): Iteratee[E, That]
+    def apply[B, That]()(implicit t: E => IterableOnce[B], bf: scala.collection.BuildFrom[E, B, That]): Iteratee[E, That]
   }
 
   /**
@@ -116,13 +117,17 @@ object Iteratee {
    *
    */
   def consume[E] = new Consume[E] {
-    def apply[B, That]()(implicit t: E => TraversableOnce[B], bf: scala.collection.generic.CanBuildFrom[E, B, That]): Iteratee[E, That] = {
+    def apply[B, That]()(implicit t: E => IterableOnce[B], bf: scala.collection.BuildFrom[E, B, That]): Iteratee[E, That] = {
       fold[E, Seq[E]](Seq.empty) { (els, chunk) =>
         chunk +: els
       }(dec).map { elts =>
-        val builder = bf()
-        elts.reverse.foreach(builder ++= _)
-        builder.result()
+        if (elts.isEmpty) {
+          ???
+        } else {
+          val builder = bf.newBuilder(elts.head)
+          elts.reverse.foreach(builder ++= _)
+          builder.result()
+        }
       }(dec)
     }
   }
@@ -571,7 +576,7 @@ trait Iteratee[E, +A] {
    * @param f a function for transforming the computed result into an Iteratee
    * $paramEcSingle Note: input concatenation is performed in the iteratee default execution context, not in the user-supplied context.
    */
-  def flatMapTraversable[B, X](f: A => Iteratee[E, B])(implicit p: E => scala.collection.TraversableLike[X, E], bf: scala.collection.generic.CanBuildFrom[E, X, E], ec: ExecutionContext): Iteratee[E, B] = {
+  def flatMapTraversable[B, X](f: A => Iteratee[E, B])(implicit p: E => play.api.libs.iteratee.ccompat.TraversableLike[X, E], bf: BuildFrom[E, X, E], ec: ExecutionContext): Iteratee[E, B] = {
     val pec = ec.prepare()
     self.pureFlatFold {
       case Step.Done(a, Input.Empty) => f(a)
@@ -671,7 +676,7 @@ trait Iteratee[E, +A] {
       }(dec)
     }(dec)
 
-  def joinConcatI[AIn, X](implicit in: A <:< Iteratee[E, AIn], p: E => scala.collection.TraversableLike[X, E], bf: scala.collection.generic.CanBuildFrom[E, X, E]): Iteratee[E, AIn] = {
+  def joinConcatI[AIn, X](implicit in: A <:< Iteratee[E, AIn], p: E => play.api.libs.iteratee.ccompat.TraversableLike[X, E], bf: BuildFrom[E, X, E]): Iteratee[E, AIn] = {
     this.flatMapTraversable {
       in(_).pureFlatFold[E, AIn] {
         case Step.Done(a, e) => Done(a, e)
