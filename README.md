@@ -28,3 +28,9 @@ The Play Iteratees implementation is described in the Play 2.5.x documentation o
 If you are using Play 2.6.x or higher and are looking for `Streams` class, you can find it under:
 
 * https://github.com/playframework/play-iteratees/blob/master/streams/src/main/scala/play/api/libs/iteratee/streams/IterateeStreams.scala
+
+## Support
+
+The Play iteratees library is *[Community Driven][]*.
+
+[Community Driven]: https://developer.lightbend.com/docs/reactive-platform/2.0/support-terminology/index.html#community-driven
