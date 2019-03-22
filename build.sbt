@@ -26,7 +26,7 @@ lazy val `play-iteratees` = project
   .enablePlugins(PlayLibrary)
   .settings(formattingSettings)
   .settings(
-    scalaVersion := scala212,	
+    scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala211),
     libraryDependencies ++= Seq(
       "org.scala-stm" %% "scala-stm" % "0.9"
@@ -38,7 +38,7 @@ lazy val `play-iteratees-reactive-streams` = project
   .enablePlugins(PlayLibrary)
   .settings(Defaults.itSettings, formattingSettings)
   .settings(
-    scalaVersion := scala212,   
+    scalaVersion := scala212, 
     crossScalaVersions := Seq(scala212, scala211),
     libraryDependencies ++= Seq(
       "org.reactivestreams" % "reactive-streams" % "1.0.2"
@@ -49,7 +49,7 @@ lazy val `play-iteratees-root` = (project in file("."))
   .enablePlugins(PlayRootProject)
   .aggregate(`play-iteratees`, `play-iteratees-reactive-streams`)
   .settings(
-    scalaVersion := scala212,	
-    crossScalaVersions := Seq(scala212, scala211)	
+    scalaVersion := scala212,
+    crossScalaVersions := Seq(scala212, scala211)
   )
 playBuildRepoName in ThisBuild := "play-iteratees"
