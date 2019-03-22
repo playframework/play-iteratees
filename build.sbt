@@ -38,7 +38,7 @@ lazy val `play-iteratees-reactive-streams` = project
   .enablePlugins(PlayLibrary)
   .settings(Defaults.itSettings, formattingSettings)
   .settings(
-    scalaVersion := scala212, 
+    scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala211),
     libraryDependencies ++= Seq(
       "org.reactivestreams" % "reactive-streams" % "1.0.2"
