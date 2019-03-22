@@ -1,4 +1,6 @@
+import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import interplay.ScalaVersions._
+import scalariform.formatter.preferences._
 
 val scala213Version = "2.13.0-M5"
 
@@ -9,15 +11,20 @@ val specsBuild = Seq(
   "specs2-mock"
 ).map("org.specs2" %% _ % specsVersion)
 
-val commonSettings = scalariformSettings ++ Seq(
-  scalaVersion := scala212,
-  crossScalaVersions := Seq(scala212, scala211, scala213Version)
+val formattingSettings = Seq(
+  scalariformAutoformat := true,
+  ScalariformKeys.preferences := ScalariformKeys.preferences.value
+    .setPreference(SpacesAroundMultiImports, true)
+    .setPreference(SpaceInsideParentheses, false)
+    .setPreference(DanglingCloseParenthesis, Preserve)
+    .setPreference(PreserveSpaceBeforeArguments, true)
+    .setPreference(DoubleIndentConstructorArguments, true)
 )
 
 lazy val `play-iteratees` = project
   .in(file("iteratees"))
   .enablePlugins(PlayLibrary)
-  .settings(commonSettings: _*)
+  .settings(formattingSettings)
   .settings(
     libraryDependencies ++= Seq(
       "org.scala-stm" %% "scala-stm" % "0.9"
@@ -27,7 +34,7 @@ lazy val `play-iteratees` = project
 lazy val `play-iteratees-reactive-streams` = project
   .in(file("streams"))
   .enablePlugins(PlayLibrary)
-  .settings(commonSettings: _*)
+  .settings(Defaults.itSettings, formattingSettings)
   .settings(
     libraryDependencies ++= Seq(
       "org.reactivestreams" % "reactive-streams" % "1.0.2"
