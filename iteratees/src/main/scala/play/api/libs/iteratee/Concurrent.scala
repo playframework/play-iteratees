@@ -615,10 +615,8 @@ object Concurrent {
       Iteratee.flatten(ready.flatMap { _ =>
 
         val downToZero = atomic { implicit txn =>
-          val ready = commitReady().toMap
           iteratees.transform(commitReady().map(_._2) ++ _)
           (interested.length > 0 && iteratees().length <= 0)
-
         }
         def result(): Iteratee[E, Unit] = if (in == Input.EOF || closeFlag) Done((), Input.Empty) else Cont(step)
         if (downToZero) Future(interestIsDownToZero())(pec).map(_ => result())(dec) else Future.successful(result())
@@ -819,11 +817,10 @@ object Concurrent {
               }
               case err => folder(err)
             }(ec)
-            toReturn.onComplete {
+            toReturn.andThen {
               case Failure(e) => doneIteratee.failure(e)
               case _ =>
             }(dec)
-            toReturn
           }
         }
 
