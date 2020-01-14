@@ -2,8 +2,6 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import interplay.ScalaVersions._
 import scalariform.formatter.preferences._
 
-val scala213Version = "2.13.0-M5"
-
 val specsVersion = "4.3.6"
 val specsBuild = Seq(
   "specs2-core",
