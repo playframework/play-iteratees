@@ -4,6 +4,15 @@
 
 This is the Play iteratees library.  It has two modules, `play-iteratees`, which provides the iteratees themselves, as well as `play-iteratees-reactive-streams`, which provides a reactive streams implementation on top of iteratees.
 
+# End of Life
+
+The active Playframework contributors consider this repository has reached End of Life and can be archived. If you want to develop this library further, feel free to reach out.
+
+**We'll archive this repository by End of July 2020.**
+
+Thank you to all contributors that worked on this repository!
+
+
 ## Library Dependencies
 
 To add play-iteratees to your project:
@@ -28,9 +37,3 @@ The Play Iteratees implementation is described in the Play 2.5.x documentation o
 If you are using Play 2.6.x or higher and are looking for `Streams` class, you can find it under:
 
 * https://github.com/playframework/play-iteratees/blob/master/streams/src/main/scala/play/api/libs/iteratee/streams/IterateeStreams.scala
-
-## Support
-
-The Play iteratees library is *[Community Driven][]*.
-
-[Community Driven]: https://developer.lightbend.com/docs/lightbend-platform/introduction/getting-help/support-terminology.html#community-driven
