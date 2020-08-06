@@ -96,12 +96,10 @@ object Traversable {
    * $paramEcSingle
    */
   def splitOnceAt[M, E](p: E => Boolean)(implicit traversableLike: M => scala.collection.TraversableLike[E, M], ec: ExecutionContext): Enumeratee[M, M] = new CheckDone[M, M] {
-    val pec = ec.prepare()
-
     def step[A](k: K[M, A]): K[M, Iteratee[M, A]] = {
 
       case in @ Input.El(e) =>
-        Iteratee.flatten(Future(e.span(p))(pec).map {
+        Iteratee.flatten(Future(e.span(p))(ec).map {
           case (prefix, suffix) if suffix.isEmpty => new CheckDone[M, M] { def continue[A](k: K[M, A]) = Cont(step(k)) } &> k(Input.El(prefix))
           case (prefix, suffix) => Done(if (prefix.isEmpty) Cont(k) else k(Input.El(prefix)), Input.El(suffix.drop(1)))
         }(dec))

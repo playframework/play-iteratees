@@ -2,7 +2,7 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import interplay.ScalaVersions._
 import scalariform.formatter.preferences._
 
-val specsVersion = "3.8.9"
+val specsVersion = "4.3.6"
 val specsBuild = Seq(
   "specs2-core",
   "specs2-junit",
@@ -27,7 +27,7 @@ lazy val `play-iteratees` = project
     scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala211),
     libraryDependencies ++= Seq(
-      "org.scala-stm" %% "scala-stm" % "0.8"
+      "org.scala-stm" %% "scala-stm" % "0.9"
     ) ++ specsBuild.map(_ % Test)
   )
 
@@ -39,7 +39,7 @@ lazy val `play-iteratees-reactive-streams` = project
     scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala211),
     libraryDependencies ++= Seq(
-      "org.reactivestreams" % "reactive-streams" % "1.0.0"
+      "org.reactivestreams" % "reactive-streams" % "1.0.2"
     ) ++ specsBuild.map(_ % Test)
   ).dependsOn(`play-iteratees`)
 
@@ -50,5 +50,4 @@ lazy val `play-iteratees-root` = (project in file("."))
     scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala211)
   )
-
 playBuildRepoName in ThisBuild := "play-iteratees"

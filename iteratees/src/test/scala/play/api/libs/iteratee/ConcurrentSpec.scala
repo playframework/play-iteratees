@@ -111,11 +111,10 @@ object ConcurrentSpec extends Specification
           case in => throw new MatchError(in) // Shouldn't occur, but here to suppress compiler warning
         }, Duration(100, MILLISECONDS)))
         val fastEnumerator = Enumerator[Long](1, 2, 3, 4, 5, 6, 7, 8, 9, 10) >>> Enumerator.eof
-        val preparedMapEC = mapEC.prepare()
         val result =
           fastEnumerator |>>>
             (Concurrent.buffer(20) &>>
-              slowIteratee).flatMap { l => Iteratee.getChunks.map(l ++ (_: List[Long]))(preparedMapEC) }(flatMapEC)
+              slowIteratee).flatMap { l => Iteratee.getChunks.map(l ++ (_: List[Long]))(mapEC) }(flatMapEC)
 
         Await.result(result, Duration.Inf) must not equalTo (List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
         flatMapEC.executionCount must beGreaterThan(0)

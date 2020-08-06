@@ -63,7 +63,7 @@ private[play] final class RunQueue {
    * The operation will execute in the given ExecutionContext.
    */
   def schedule[A](body: => Future[A])(implicit ec: ExecutionContext): Unit = {
-    schedule(Op(() => body.asInstanceOf[Future[Unit]], ec.prepare))
+    schedule(Op(() => body.asInstanceOf[Future[Unit]], ec))
   }
 
   /**
@@ -154,7 +154,7 @@ private object RunQueue {
    * A reified operation to be executed.
    *
    * @param thunk The logic to execute.
-   * @param ec The ExecutionContext to use for execution. Already prepared.
+   * @param ec The ExecutionContext to use for execution.
    */
   final case class Op(thunk: () => Future[Unit], ec: ExecutionContext)
 
