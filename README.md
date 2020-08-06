@@ -1,17 +1,14 @@
-[<img src="https://img.shields.io/travis/playframework/play-iteratees.svg"/>](https://travis-ci.org/playframework/play-iteratees) [![Maven](https://img.shields.io/maven-central/v/com.typesafe.play/play-iteratees_2.12.svg)](http://mvnrepository.com/artifact/com.typesafe.play/play-iteratees_2.12)
+# End of Life
+
+The active Playframework contributors consider this repository has reached End of Life and archived it.
+
+This repository is not being used anymore and won't get any further updates.
+
+Thank you to all contributors that worked on this repository!
 
 # Play Iteratees Library
 
 This is the Play iteratees library.  It has two modules, `play-iteratees`, which provides the iteratees themselves, as well as `play-iteratees-reactive-streams`, which provides a reactive streams implementation on top of iteratees.
-
-# End of Life
-
-The active Playframework contributors consider this repository has reached End of Life and can be archived. If you want to develop this library further, feel free to reach out.
-
-**We'll archive this repository by End of July 2020.**
-
-Thank you to all contributors that worked on this repository!
-
 
 ## Library Dependencies
 
