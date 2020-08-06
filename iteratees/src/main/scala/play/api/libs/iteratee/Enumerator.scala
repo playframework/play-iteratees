@@ -529,9 +529,10 @@ object Enumerator {
             Future.successful(None)
         }(dec)
 
-        next.onFailure {
-          case reason: Exception =>
+        next.onComplete {
+          case Failure(reason) =>
             onError(reason.getMessage(), Input.Empty)
+          case _ =>
         }(dec)
 
         next.onComplete {
